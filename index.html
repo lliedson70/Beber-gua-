@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<meta name="theme-color" content="#0F6E56"/>
+<title>💧 Beber Água</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  :root {
+    --green: #1D9E75; --green-dark: #0F6E56; --green-light: #E1F5EE; --green-text: #085041;
+    --bg: #f0f9f6; --surface: #ffffff; --surface2: #f5f5f3;
+    --border: rgba(0,0,0,0.09); --text: #1a1a1a; --text2: #666;
+    --radius: 16px; --radius-sm: 10px;
+    --amber: #BA7517; --amber-light: #FAEEDA; --amber-text: #633806;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0d1f1a; --surface: #152b24; --surface2: #1c3a30;
+      --border: rgba(255,255,255,0.09); --text: #f0f0f0; --text2: #8fada6;
+      --green-light: #0d2e22; --green-text: #5DCAA5;
+      --amber-light: #2e1f05; --amber-text: #FAC775;
+    }
+  }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding-bottom: 2rem; }
+  header { background: var(--green-dark); color: #fff; padding: 1.25rem 1.25rem 1rem; }
+  header h1 { font-size: 20px; font-weight: 600; }
+  header .sub { font-size: 13px; opacity: 0.75; margin-top: 1px; }
+  .container { max-width: 480px; margin: 0 auto; padding: 1rem; }
+  .card { background: var(--surface); border: 0.5px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
+  .center { display: flex; flex-direction: column; align-items: center; }
+  .ring-wrap { position: relative; width: 160px; height: 160px; margin: 0.5rem 0 1.25rem; }
+  .ring-wrap svg { width: 160px; height: 160px; }
+  .ring-inner { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  .ring-inner .pct { font-size: 32px; font-weight: 700; color: var(--green-dark); line-height: 1; }
+  .ring-inner .pct-label { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .msg { font-size: 15px; color: var(--text2); text-align: center; margin-bottom: 1.25rem; min-height: 40px; line-height: 1.5; }
+  .btn-main { background: var(--green); color: #fff; border: none; border-radius: var(--radius-sm); padding: 14px 20px; font-size: 16px; font-weight: 600; cursor: pointer; width: 100%; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.15s, transform 0.1s; }
+  .btn-main:hover { background: var(--green-dark); }
+  .btn-main:active { transform: scale(0.98); }
+  .btn-row { display: flex; gap: 8px; margin-top: 10px; }
+  .btn-sm { flex: 1; background: var(--surface2); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 9px 4px; font-size: 13px; font-weight: 500; cursor: pointer; color: var(--text); transition: background 0.15s; }
+  .btn-sm:hover { background: var(--green-light); color: var(--green-text); }
+  .btn-reset { background: transparent; border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 9px 12px; font-size: 13px; cursor: pointer; color: var(--text2); }
+  .btn-reset:hover { color: var(--text); }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 1rem; }
+  .metric { background: var(--surface2); border-radius: var(--radius-sm); padding: 1rem; }
+  .metric .lbl { font-size: 12px; color: var(--text2); margin-bottom: 4px; }
+  .metric .val { font-size: 22px; font-weight: 700; color: var(--text); }
+  .metric .sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .section-lbl { font-size: 11px; font-weight: 600; letter-spacing: 0.07em; text-transform: uppercase; color: var(--text2); margin-bottom: 10px; }
+  .badge { background: var(--green-light); color: var(--green-text); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .badge-done { background: var(--green); color: #fff; font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .badge-pending { background: var(--surface2); color: var(--text2); font-size: 12px; font-weight: 600; padding: 3px 10px; border-radius: 20px; }
+  .hist-item { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 0.5px solid var(--border); font-size: 14px; }
+  .hist-item:last-child { border-bottom: none; }
+  .hist-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .hist-ml { flex: 1; color: var(--text); font-weight: 500; }
+  .hist-time { color: var(--text2); font-size: 13px; }
+  .empty { font-size: 13px; color: var(--text2); padding: 8px 0; }
+  .reminder-row { display: flex; align-items: center; justify-content: space-between; }
+  .reminder-time { font-size: 22px; font-weight: 700; color: var(--text); }
+  .reminder-sub { font-size: 12px; color: var(--text2); margin-top: 2px; }
+  .slider-row { display: flex; align-items: center; gap: 10px; margin-top: 8px; }
+  .slider-row input[type=range] { flex: 1; height: 4px; accent-color: var(--green); cursor: pointer; }
+  .val-label { font-size: 13px; color: var(--text2); min-width: 56px; text-align: right; }
+  #toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--green-dark); color: #fff; padding: 10px 20px; border-radius: 30px; font-size: 14px; font-weight: 500; transition: transform 0.3s ease, opacity 0.3s; opacity: 0; pointer-events: none; white-space: nowrap; z-index: 100; }
+  #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+
+  /* Avulso input row */
+  .avulso-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
+  .avulso-row input[type=number] { flex: 1; padding: 9px 12px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text); font-size: 14px; outline: none; min-width: 0; }
+  .avulso-row input[type=number]:focus { border-color: var(--green); }
+  .btn-avulso { background: var(--surface2); border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 9px 14px; font-size: 13px; font-weight: 600; cursor: pointer; color: var(--green-dark); white-space: nowrap; transition: background 0.15s; }
+  .btn-avulso:hover { background: var(--green-light); }
+  .avulso-label { font-size: 12px; color: var(--text2); margin-top: 6px; }
+
+  /* Setup modal */
+  .modal-bg { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 200; padding: 1rem; }
+  .modal-bg.hidden { display: none; }
+  .modal { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; width: 100%; max-width: 380px; }
+  .modal h2 { font-size: 18px; font-weight: 600; margin-bottom: 0.5rem; }
+  .modal p { font-size: 14px; color: var(--text2); margin-bottom: 1.25rem; line-height: 1.5; }
+  .field { margin-bottom: 1rem; }
+  .field label { display: block; font-size: 13px; color: var(--text2); margin-bottom: 6px; font-weight: 500; }
+  .field input[type=number] { width: 100%; padding: 10px 12px; border: 0.5px solid var(--border); border-radius: var(--radius-sm); background: var(--surface2); color: var(--text); font-size: 16px; outline: none; }
+  .field input[type=number]:focus { border-color: var(--green); }
+  .field .hint { font-size: 12px; color: var(--text2); margin-top: 5px; }
+  .modal .preview { background: var(--green-light); color: var(--green-text); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 14px; font-weight: 500; margin-bottom: 1.25rem; line-height: 1.6; }
+
+  /* Turnos */
+  .turno { border: 0.5px solid var(--border); border-radius: var(--radius-sm); padding: 1rem; margin-bottom: 10px; transition: background 0.2s; }
+  .turno.done { background: var(--green-light); border-color: var(--green); }
+  .turno.active { border-color: var(--amber); background: var(--amber-light); }
+  .turno-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .turno-title { font-size: 15px; font-weight: 600; }
+  .turno.done .turno-title { color: var(--green-text); }
+  .turno.active .turno-title { color: var(--amber-text); }
+  .copos-row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .copo { width: 32px; height: 32px; border-radius: 8px; border: 1.5px solid var(--border); background: var(--surface2); display: flex; align-items: center; justify-content: center; font-size: 16px; transition: all 0.2s; }
+  .copo.filled { background: var(--green); border-color: var(--green); }
+  .turno.active .copo.filled { background: var(--amber); border-color: var(--amber); }
+  .turno-sub { font-size: 12px; color: var(--text2); }
+  .turno.done .turno-sub { color: var(--green-text); opacity: 0.8; }
+</style>
+</head>
+<body>
+
+<div id="setup-modal" class="modal-bg">
+  <div class="modal">
+    <h2>💧 Configure sua meta</h2>
+    <p>Informe sua meta diária e o tamanho do seu copo. O app vai dividir automaticamente entre manhã, tarde e noite.</p>
+    <div class="field">
+      <label>Meta diária (litros)</label>
+      <input type="number" id="setup-litros" value="2" min="0.5" max="6" step="0.1"/>
+      <div class="hint">Ex: 2 para 2 litros por dia</div>
+    </div>
+    <div class="field">
+      <label>Tamanho do seu copo (ml)</label>
+      <input type="number" id="setup-copo" value="250" min="100" max="1000" step="50"/>
+      <div class="hint">Ex: 250 para um copo comum</div>
+    </div>
+    <div class="preview" id="setup-preview">—</div>
+    <button class="btn-main" onclick="confirmarSetup()">Salvar e começar</button>
+  </div>
+</div>
+
+<header>
+  <div>
+    <h1>💧 Beber Água</h1>
+    <div class="sub" id="header-date"></div>
+  </div>
+</header>
+
+<div class="container">
+
+  <div class="card center">
+    <div class="ring-wrap">
+      <svg viewBox="0 0 160 160">
+        <circle cx="80" cy="80" r="66" fill="none" stroke="var(--border)" stroke-width="12"/>
+        <circle id="ring" cx="80" cy="80" r="66" fill="none" stroke="var(--green)" stroke-width="12"
+          stroke-linecap="round" stroke-dasharray="414.7" stroke-dashoffset="414.7"
+          style="transform: rotate(-90deg); transform-origin: 80px 80px; transition: stroke-dashoffset 0.5s ease;"/>
+      </svg>
+      <div class="ring-inner">
+        <div style="font-size:28px;margin-bottom:2px;">💧</div>
+        <div class="pct" id="pct">0%</div>
+        <div class="pct-label">da meta</div>
+      </div>
+    </div>
+    <div class="msg" id="msg">Vamos começar! Beba seu primeiro copo.</div>
+    <button class="btn-main" id="btn-copo" onclick="bebiUmCopo()">+ Bebi um copo</button>
+    <div class="avulso-row">
+      <input type="number" id="avulso-ml" placeholder="Ex: 400" min="1" max="5000" step="10"/>
+      <button class="btn-avulso" onclick="bebiAvulso()">+ Outro ml</button>
+    </div>
+    <div class="avulso-label">Use para registrar um copo de tamanho diferente da sua meta</div>
+    <div class="btn-row" style="margin-top:10px;">
+      <button class="btn-reset" onclick="abrirSetup()" style="flex:1">⚙️ Alterar meta</button>
+      <button class="btn-reset" onclick="resetDay()">↺ Reset</button>
+    </div>
+  </div>
+
+  <div class="grid2">
+    <div class="metric">
+      <div class="lbl">💧 Consumido</div>
+      <div class="val" id="consumed">0 ml</div>
+      <div class="sub" id="glasses-info">0 copos</div>
+    </div>
+    <div class="metric">
+      <div class="lbl">🎯 Meta diária</div>
+      <div class="val" id="goal-disp">—</div>
+      <div class="sub" id="copo-disp">—</div>
+    </div>
+  </div>
+
+  <!-- Turnos -->
+  <div class="card">
+    <div class="section-lbl">Turnos do dia</div>
+    <div id="turnos-container"></div>
+  </div>
+
+  <!-- Lembrete -->
+  <div class="card">
+    <div class="section-lbl">Próximo lembrete</div>
+    <div class="reminder-row">
+      <div>
+        <div class="reminder-time" id="next-time">—</div>
+        <div class="reminder-sub">a cada <span id="interval-lbl">60</span> min</div>
+      </div>
+      <span class="badge">Ativo</span>
+    </div>
+    <div class="slider-row">
+      <input type="range" min="15" max="120" step="15" value="60" id="intervalRange" oninput="updateInterval(this.value)"/>
+      <span class="val-label" id="interval-disp">60 min</span>
+    </div>
+  </div>
+
+  <!-- Histórico -->
+  <div class="card">
+    <div class="section-lbl">Histórico de hoje</div>
+    <div id="history"><div class="empty">Nenhum registro ainda.</div></div>
+  </div>
+
+</div>
+
+<div id="toast"></div>
+
+<script>
+  const TURNOS_DEF = [
+    { nome: 'Manhã', emoji: '🌅', hora: 'até 12h' },
+    { nome: 'Tarde', emoji: '☀️', hora: '12h – 18h' },
+    { nome: 'Noite', emoji: '🌙', hora: 'após 18h' },
+  ];
+
+  let total = 0;
+  let goal = 2000;
+  let copoMl = 250;
+  let totalCopos = 0;
+  let coposPorTurno = [3, 3, 3];
+  let turnosBebidos = [0, 0, 0];
+  let history = [];
+  let intervalMin = 60;
+  let timerId = null;
+
+  const STORAGE_KEY = 'agua_v2_' + new Date().toDateString();
+  const CONFIG_KEY = 'agua_config_v2';
+
+  function calcTurnos() {
+    totalCopos = Math.round(goal / copoMl);
+    const base = Math.floor(totalCopos / 3);
+    const resto = totalCopos % 3;
+    coposPorTurno = [base + (resto > 0 ? 1 : 0), base + (resto > 1 ? 1 : 0), base];
+  }
+
+  function turnoAtual() {
+    const h = new Date().getHours();
+    if (h < 12) return 0;
+    if (h < 18) return 1;
+    return 2;
+  }
+
+  function renderTurnos() {
+    const el = document.getElementById('turnos-container');
+    const atual = turnoAtual();
+    el.innerHTML = TURNOS_DEF.map((t, i) => {
+      const total_t = coposPorTurno[i];
+      const beb = Math.min(turnosBebidos[i], total_t);
+      const done = beb >= total_t;
+      const active = i === atual && !done;
+      let cls = '';
+      if (done) cls = 'done';
+      else if (active) cls = 'active';
+
+      const copos = Array.from({ length: total_t }, (_, k) =>
+        `<div class="copo ${k < beb ? 'filled' : ''}">💧</div>`
+      ).join('');
+
+      const badgeHtml = done
+        ? `<span class="badge-done">✓ Completo</span>`
+        : active
+          ? `<span class="badge" style="background:var(--amber-light);color:var(--amber-text);">Agora</span>`
+          : `<span class="badge-pending">${t.hora}</span>`;
+
+      return `<div class="turno ${cls}">
+        <div class="turno-header">
+          <div class="turno-title">${t.emoji} ${t.nome}</div>
+          ${badgeHtml}
+        </div>
+        <div class="copos-row">${copos}</div>
+        <div class="turno-sub">${beb} de ${total_t} copos (${beb * copoMl} / ${total_t * copoMl} ml)</div>
+      </div>`;
+    }).join('');
+  }
+
+  function bebiUmCopo() {
+    const t = turnoAtual();
+    turnosBebidos[t]++;
+    total += copoMl;
+    const now = new Date();
+    history.unshift({ ml: copoMl, time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }) });
+    if (history.length > 20) history.pop();
+    renderHistory();
+    updateRing();
+    renderTurnos();
+    save();
+    showToast('+' + copoMl + ' ml registrado! 💧');
+    if (total >= goal && total - copoMl < goal) {
+      setTimeout(() => showToast('🎉 Meta diária atingida!'), 2500);
+    }
+    scheduleNext();
+  }
+
+  function bebiAvulso() {
+    const input = document.getElementById('avulso-ml');
+    const ml = parseInt(input.value);
+    if (!ml || ml < 1) { showToast('Digite a quantidade em ml'); return; }
+    // Calcula quantos "copos da meta" equivale, pra contar nos turnos proporcionalmente
+    const equiv = ml / copoMl;
+    const t = turnoAtual();
+    turnosBebidos[t] = Math.min(turnosBebidos[t] + equiv, coposPorTurno[t] + equiv);
+    total += ml;
+    const now = new Date();
+    history.unshift({ ml, time: now.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' }), avulso: true });
+    if (history.length > 20) history.pop();
+    input.value = '';
+    renderHistory();
+    updateRing();
+    renderTurnos();
+    save();
+    showToast('+' + ml + ' ml registrado! 💧');
+    if (total >= goal && total - ml < goal) {
+      setTimeout(() => showToast('🎉 Meta diária atingida!'), 2500);
+    }
+    scheduleNext();
+  }
+
+  function updateRing() {
+    const pct = Math.min(total / goal, 1);
+    document.getElementById('ring').style.strokeDashoffset = 414.7 * (1 - pct);
+    document.getElementById('pct').textContent = Math.round(pct * 100) + '%';
+    document.getElementById('consumed').textContent = total + ' ml';
+    document.getElementById('glasses-info').textContent = Math.round(total / copoMl * 10) / 10 + ' copos';
+    document.getElementById('goal-disp').textContent = (goal / 1000).toFixed(1) + ' L';
+    document.getElementById('copo-disp').textContent = copoMl + ' ml por copo';
+    document.getElementById('btn-copo').textContent = '+ Bebi um copo (' + copoMl + ' ml)';
+
+    const msgs = [
+      [0, 'Vamos começar! Beba seu primeiro copo. 🌿'],
+      [0.01, 'Ótimo começo! Continue assim.'],
+      [0.25, 'Bom começo! Você está no caminho certo. 👍'],
+      [0.5, 'Metade da meta! Está indo muito bem. 💪'],
+      [0.75, 'Quase lá! Só mais um pouquinho.'],
+      [1.0, 'Meta do dia atingida! Parabéns! 🎉'],
+    ];
+    let m = msgs[0][1];
+    for (const [thr, txt] of msgs) { if (pct >= thr) m = txt; }
+    document.getElementById('msg').textContent = m;
+  }
+
+  function renderHistory() {
+    const el = document.getElementById('history');
+    if (!history.length) { el.innerHTML = '<div class="empty">Nenhum registro ainda.</div>'; return; }
+    el.innerHTML = history.slice(0, 10).map(h =>
+      `<div class="hist-item"><div class="hist-dot" style="${h.avulso ? 'background:var(--amber)' : ''}"></div><span class="hist-ml">+${h.ml} ml${h.avulso ? ' <span style="font-size:11px;color:var(--text2);font-weight:400;">(avulso)</span>' : ''}</span><span class="hist-time">${h.time}</span></div>`
+    ).join('');
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2200);
+  }
+
+  function resetDay() {
+    if (!confirm('Reiniciar o registro de hoje?')) return;
+    total = 0; history = []; turnosBebidos = [0, 0, 0];
+    renderHistory(); updateRing(); renderTurnos(); save(); scheduleNext();
+  }
+
+  function updateInterval(v) {
+    intervalMin = parseInt(v);
+    document.getElementById('interval-lbl').textContent = v;
+    document.getElementById('interval-disp').textContent = v + ' min';
+    save(); scheduleNext();
+  }
+
+  function scheduleNext() {
+    clearTimeout(timerId);
+    const next = new Date(Date.now() + intervalMin * 60000);
+    document.getElementById('next-time').textContent =
+      next.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+    timerId = setTimeout(triggerReminder, intervalMin * 60000);
+  }
+
+  function triggerReminder() {
+    if ('Notification' in window && Notification.permission === 'granted') {
+      new Notification('💧 Hora de beber água!', { body: 'Não esqueça de se hidratar!' });
+    }
+    showToast('⏰ Hora de beber água!');
+    scheduleNext();
+  }
+
+  // Setup modal
+  function abrirSetup() {
+    document.getElementById('setup-litros').value = (goal / 1000).toFixed(1);
+    document.getElementById('setup-copo').value = copoMl;
+    atualizarPreview();
+    document.getElementById('setup-modal').classList.remove('hidden');
+  }
+
+  function atualizarPreview() {
+    const litros = parseFloat(document.getElementById('setup-litros').value) || 2;
+    const copo = parseInt(document.getElementById('setup-copo').value) || 250;
+    const meta = Math.round(litros * 1000);
+    const copos = Math.round(meta / copo);
+    const base = Math.floor(copos / 3);
+    const resto = copos % 3;
+    const t = [base + (resto > 0 ? 1 : 0), base + (resto > 1 ? 1 : 0), base];
+    document.getElementById('setup-preview').innerHTML =
+      `Total: <strong>${copos} copos</strong> de ${copo} ml por dia<br>` +
+      `🌅 Manhã: ${t[0]} copos &nbsp; ☀️ Tarde: ${t[1]} copos &nbsp; 🌙 Noite: ${t[2]} copos`;
+  }
+
+  document.getElementById('setup-litros').addEventListener('input', atualizarPreview);
+  document.getElementById('setup-copo').addEventListener('input', atualizarPreview);
+
+  function confirmarSetup() {
+    const litros = parseFloat(document.getElementById('setup-litros').value) || 2;
+    const copo = parseInt(document.getElementById('setup-copo').value) || 250;
+    goal = Math.round(litros * 1000);
+    copoMl = copo;
+    calcTurnos();
+    saveConfig();
+    document.getElementById('setup-modal').classList.add('hidden');
+    updateRing();
+    renderTurnos();
+    showToast('Meta atualizada! 🎯');
+  }
+
+  function save() {
+    try { localStorage.setItem(STORAGE_KEY, JSON.stringify({ total, history, turnosBebidos, intervalMin })); } catch(e) {}
+  }
+
+  function saveConfig() {
+    try { localStorage.setItem(CONFIG_KEY, JSON.stringify({ goal, copoMl })); } catch(e) {}
+  }
+
+  function load() {
+    try {
+      const cfg = localStorage.getItem(CONFIG_KEY);
+      if (cfg) { const d = JSON.parse(cfg); goal = d.goal || 2000; copoMl = d.copoMl || 250; }
+      const raw = localStorage.getItem(STORAGE_KEY);
+      if (raw) {
+        const d = JSON.parse(raw);
+        total = d.total || 0;
+        history = d.history || [];
+        turnosBebidos = d.turnosBebidos || [0, 0, 0];
+        intervalMin = d.intervalMin || 60;
+        document.getElementById('intervalRange').value = intervalMin;
+        document.getElementById('interval-disp').textContent = intervalMin + ' min';
+        document.getElementById('interval-lbl').textContent = intervalMin;
+      }
+    } catch(e) {}
+
+    const temConfig = !!localStorage.getItem(CONFIG_KEY);
+    if (!temConfig) {
+      atualizarPreview();
+      document.getElementById('setup-modal').classList.remove('hidden');
+    } else {
+      document.getElementById('setup-modal').classList.add('hidden');
+    }
+  }
+
+  function setHeaderDate() {
+    const d = new Date();
+    document.getElementById('header-date').textContent =
+      d.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
+  }
+
+  if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission();
+
+  load();
+  calcTurnos();
+  updateRing();
+  renderHistory();
+  renderTurnos();
+  scheduleNext();
+  setHeaderDate();
+</script>
+</body>
+</html>
